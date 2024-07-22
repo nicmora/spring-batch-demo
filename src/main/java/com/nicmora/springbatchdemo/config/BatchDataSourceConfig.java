@@ -1,8 +1,9 @@
 package com.nicmora.springbatchdemo.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -18,12 +19,15 @@ public class BatchDataSourceConfig {
 
     @Bean(name = "batchDataSource")
     public DataSource batchDataSource() {
-        return DataSourceBuilder.create()
-                .driverClassName(env.getProperty("spring.datasource.batch.driverClassName"))
-                .url(env.getProperty("spring.datasource.batch.url"))
-                .username(env.getProperty("spring.datasource.batch.username"))
-                .password(env.getProperty("spring.datasource.batch.password"))
-                .build();
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName(env.getProperty("spring.datasource.batch.driverClassName"));
+        config.setJdbcUrl(env.getProperty("spring.datasource.batch.url"));
+        config.setUsername(env.getProperty("spring.datasource.batch.username"));
+        config.setPassword(env.getProperty("spring.datasource.batch.password"));
+        config.setSchema("batch");
+        config.addDataSourceProperty("currentSchema", "batch");
+
+        return new HikariDataSource(config);
     }
 
     @Bean("batchTransactionManager")
